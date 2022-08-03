@@ -35,7 +35,7 @@ async def send_update_data(message: types.Message):
 
 
 # Handle command 'start'
-@dp.message(commadns=["start"])
+@dp.message(commands=["start"])
 async def great(message: types.Message):
     """  Great the user  """
     await message.answer(text="Assalamu Alaykum, {}!".format(message.from_user.full_name))
