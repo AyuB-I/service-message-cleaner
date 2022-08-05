@@ -15,7 +15,8 @@ env = Env()
 env.read_env()
 
 bot_token = env("BOT_TOKEN")
-admin_ids = env.list("ADMIN_IDS")
+admin_ids = [int(x) for x in env.list("ADMIN_IDS")]
+logging.info(f"{admin_ids=}")
 photo_id = env("PHOTO_ID")
 
 tgbot = Bot(token=bot_token, parse_mode="HTML")
@@ -48,10 +49,8 @@ async def delete_service_messages(message: types.Message):
 
 
 # Handle links if they weren't sent from admin
-@dp.message(F.text.regexp(
-    r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"),
-    is_not_chat_admin=True
-)
+@dp.message(F.text.regexp(r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"),
+            is_not_chat_admin=True)
 async def anti_link(message: types.Message):
     """  Delete any type of links  """
     await message.delete()
@@ -64,7 +63,7 @@ async def send_update_data(message: types.Message):
 
 # Handle command 'start'
 @dp.message(F.chat.type == "private", commands=["start"])
-async def great(message: types.Message):
+async def great(message: types.Message, bot: Bot):
     """  Great the user  """
     await message.answer(text="Assalamu Alaykum, {}!".format(message.from_user.full_name))
     await message.answer_photo(
@@ -73,6 +72,13 @@ async def great(message: types.Message):
                 "<code>servis</code> xabarlardan va <code>havolalardan</code> tozalayman.\n"
                 "<i>P.S Bizda reklama yo'q :)</i>"
     )
+    # Send message to admins about new user
+    for admin_id in admin_ids:
+        if message.from_user.id not in admin_ids:
+            await bot.send_message(chat_id=admin_id, text=f"New user:\n"
+                                                          f"    ID: {message.from_user.id}\n"
+                                                          f"    Full name: {message.from_user.full_name}\n"
+                                                          f"    Username: {message.from_user.username}")
 
 
 # Handle command 'help'
