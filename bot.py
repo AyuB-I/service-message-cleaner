@@ -49,6 +49,8 @@ async def delete_service_messages(message: types.Message):
 
 
 # Handle links if they weren't sent from admin
+@dp.message(F.text.regexp(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"),
+            is_not_chat_admin=True)
 @dp.message(F.text.regexp(r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"),
             is_not_chat_admin=True)
 async def anti_link(message: types.Message):
